@@ -21,4 +21,144 @@
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
+  <!-- Article 2: Top 10 Budget Hotels in Delhi -->
+  <url>
+    <loc>https://blogs.gethotelstays.com/#article-2</loc>
+    <lastmod>2026-06-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <!-- Article 3: Old Delhi Street Food Walk -->
+  <url>
+    <loc>https://blogs.gethotelstays.com/#article-3</loc>
+    <lastmod>2026-06-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <!-- Article 4: A Foreigner's Guide to Delhi Metro -->
+  <url>
+    <loc>https://blogs.gethotelstays.com/#article-4</loc>
+    <lastmod>2026-06-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <!-- Article 5: Exploring the Mughal Grandeur -->
+  <url>
+    <loc>https://blogs.gethotelstays.com/#article-5</loc>
+    <lastmod>2026-06-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <!-- Article 6: Connaught Place Decoded -->
+  <url>
+    <loc>https://blogs.gethotelstays.com/#article-6</loc>
+    <lastmod>2026-06-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <!-- Article 7: Best Romantic Stays in South Delhi -->
+  <url>
+    <loc>https://blogs.gethotelstays.com/#article-7</loc>
+    <lastmod>2026-06-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <!-- Article 8: Top 5 Historical Walks in Delhi -->
+  <url>
+    <loc>https://blogs.gethotelstays.com/#article-8</loc>
+    <lastmod>2026-06-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <!-- Article 9: What to Wear in Delhi -->
+  <url>
+    <loc>https://blogs.gethotelstays.com/#article-9</loc>
+    <lastmod>2026-06-07</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <!-- Article 10: Delhi in 24 Hours Transit -->
+  <url>
+    <loc>https://blogs.gethotelstays.com/#article-10</loc>
+    <lastmod>2026-06-06</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <!-- Article 11: Peaceful Escapes in Delhi -->
+  <url>
+    <loc>https://blogs.gethotelstays.com/#article-11</loc>
+    <lastmod>2026-06-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <!-- Article 12: Delhi's Best Street Shopping Hubs -->
+  <url>
+    <loc>https://blogs.gethotelstays.com/#article-12</loc>
+    <lastmod>2026-06-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <!-- Article 13: Top 7 Hidden Historical Gems in Delhi -->
+  <url>
+    <loc>https://blogs.gethotelstays.com/#article-13</loc>
+    <lastmod>2026-06-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <!-- Article 14: The Ultimate Cafe Guide in Delhi -->
+  <url>
+    <loc>https://blogs.gethotelstays.com/#article-14</loc>
+    <lastmod>2026-06-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <!-- Article 15: Delhi Nightlife Guide -->
+  <url>
+    <loc>https://blogs.gethotelstays.com/#article-15</loc>
+    <lastmod>2026-06-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <!-- Article 16: A Guide to Delhi's Best Museums -->
+  <url>
+    <loc>https://blogs.gethotelstays.com/#article-16</loc>
+    <lastmod>2026-06-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <!-- Article 17: Weekend Getaways from Delhi -->
+  <url>
+    <loc>https://blogs.gethotelstays.com/#article-17</loc>
+    <lastmod>2026-06-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <!-- Article 18: Exploring CyberHub & Sector 29 -->
+  <url>
+    <loc>https://blogs.gethotelstays.com/#article-18</loc>
+    <lastmod>2026-06-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <!-- Article 19: Delhi's Best Street Food Spots Beyond Old Delhi -->
+  <url>
+    <loc>https://blogs.gethotelstays.com/#article-19</loc>
+    <lastmod>2026-06-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <!-- Article 20: A Complete Guide to Akshardham Temple -->
+  <url>
+    <loc>https://blogs.gethotelstays.com/#article-20</loc>
+    <lastmod>2026-06-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <!-- Article 21: Delhi for Solo Travelers -->
+  <url>
+    <loc>https://blogs.gethotelstays.com/#article-21</loc>
+    <lastmod>2026-06-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
 </urlset>

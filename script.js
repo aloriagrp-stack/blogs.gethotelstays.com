@@ -6,8 +6,8 @@ const savedArticles = localStorage.getItem('gethotel_articles');
 if (savedArticles) {
     try {
         articles = JSON.parse(savedArticles);
-        // Reset check: if any article has mock data, or if Article 1 content is outdated (lacks template)
-        const needsReset = articles.some(art => 
+        // Reset check: if stored article count is outdated, or if any article has mock data, or if Article 1 content is outdated
+        const needsReset = articles.length < initialArticles.length || articles.some(art => 
             art.id === 2 || 
             art.id === 3 || 
             art.id === 4 || 
