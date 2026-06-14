@@ -141,7 +141,7 @@ function renderBlogGrid() {
         
         card.innerHTML = `
             <div class="card-image">
-                <img src="${article.image}" alt="${article.title}" class="card-img" loading="lazy" onerror="this.src='assets/resort.png'">
+                <img src="${article.image}" alt="${article.title}" class="card-img" loading="lazy" onerror="this.src='assets/resort.webp'">
                 <span class="card-badge">${article.categoryName}</span>
             </div>
             <div class="card-content">
@@ -289,7 +289,7 @@ function loadArticlePage(id) {
             </header>
 
             <div class="modal-cover-image-container">
-                <img src="${article.image}" alt="${article.title}" class="modal-cover-image" onerror="this.src='assets/resort.png'">
+                <img src="${article.image}" alt="${article.title}" class="modal-cover-image" onerror="this.src='assets/resort.webp'">
             </div>
 
             <div class="article-body">
