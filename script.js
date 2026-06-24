@@ -349,6 +349,10 @@ function loadArticlePage(id) {
 
 // Return back to Blog Grid Listing
 function returnToBlogHome() {
+    if (window.location.pathname.includes('article-')) {
+        window.location.href = 'index.html';
+        return;
+    }
     // Remove dynamic article styles
     const oldStyle = document.getElementById('dynamic-article-styles');
     if (oldStyle) {
