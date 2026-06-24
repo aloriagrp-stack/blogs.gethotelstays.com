@@ -1,0 +1,12 @@
+# Server generated files
+error_log
+*error_log
+.htaccess
+.well-known/
+.cpanel/
+.pki/
+.DS_Store
+Thumbs.db
+node_modules/
+dist/
+.env*
