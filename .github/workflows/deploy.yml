@@ -28,17 +28,16 @@ jobs:
 
       - name: Deploy to cPanel via lftp
         env:
-          FTP_SERVER: ${{ secrets.FTP_SERVER || secrets.FTP_HOST || secrets.FTP_HOSTNAME }}
-          FTP_USER: ${{ secrets.FTP_USERNAME || secrets.FTP_USER }}
-          FTP_PASS: ${{ secrets.FTP_PASSWORD || secrets.FTP_PASS }}
+          FTP_SERVER: ${{ secrets.CPANEL_FTP_SERVER || secrets.FTP_SERVER || secrets.FTP_HOST || secrets.FTP_HOSTNAME }}
+          FTP_USER: ${{ secrets.CPANEL_FTP_USERNAME || secrets.FTP_USERNAME || secrets.FTP_USER }}
+          FTP_PASS: ${{ secrets.CPANEL_FTP_PASSWORD || secrets.FTP_PASSWORD || secrets.FTP_PASS }}
         run: |
           if [ -z "$FTP_SERVER" ] || [ -z "$FTP_USER" ] || [ -z "$FTP_PASS" ]; then
             echo "ERROR: FTP Credentials missing in GitHub Secrets!"
-            echo "Please check secret names in GitHub Settings > Secrets and variables > Actions."
             exit 1
           fi
 
-          # Clean host string (remove ftp:// prefix if user included it)
+          # Clean host string (remove ftp:// prefix if present)
           CLEAN_HOST=$(echo "$FTP_SERVER" | sed -e 's|^ftp://||' -e 's|^ftps://||' -e 's|/$||')
 
           echo "Connecting to FTP Host: $CLEAN_HOST as User: $FTP_USER..."
@@ -50,7 +49,7 @@ jobs:
           set net:max-retries 5
           set net:reconnect-interval-base 5
           
-          # Try mirroring directly to current login folder first (works for dedicated domain FTP accounts)
+          # Mirror directly to FTP root folder (for dedicated domain FTP accounts)
           mirror --reverse --no-perms --verbose \
             -x '^\.' \
             -x '^node_modules/' \
