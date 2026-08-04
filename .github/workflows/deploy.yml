@@ -56,7 +56,6 @@ jobs:
             mirror --reverse --no-perms --verbose \
               -x '^\.' \
               -x '^node_modules/' \
-              -x '^admin/' \
               -x '^generate_' \
               -x '^package' \
               -x 'README.md' \
