@@ -26,6 +26,26 @@ jobs:
       - name: Install lftp
         run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
 
+      - name: Verify secrets exist
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USER: ${{ secrets.FTP_USERNAME }}
+          FTP_PASS: ${{ secrets.FTP_PASSWORD }}
+        run: |
+          if [ -z "$FTP_SERVER" ] || [ -z "$FTP_USER" ] || [ -z "$FTP_PASS" ]; then
+            echo "ERROR: One or more FTP secrets are missing!"
+            echo "FTP_SERVER set: $([ -n "$FTP_SERVER" ] && echo YES || echo NO)"
+            echo "FTP_USERNAME set: $([ -n "$FTP_USER" ] && echo YES || echo NO)"
+            echo "FTP_PASSWORD set: $([ -n "$FTP_PASS" ] && echo YES || echo NO)"
+            echo ""
+            echo "Go to: Settings > Secrets and variables > Actions > New repository secret"
+            echo "Add: FTP_SERVER, FTP_USERNAME, FTP_PASSWORD"
+            exit 1
+          fi
+          echo "All FTP secrets are configured!"
+          echo "Server: $FTP_SERVER"
+          echo "User: $FTP_USER"
+
       - name: Deploy to cPanel via lftp
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
@@ -33,7 +53,7 @@ jobs:
           FTP_PASS: ${{ secrets.FTP_PASSWORD }}
         run: |
           echo "Deploying blogs.gethotelstays.com to cPanel..."
-          lftp -u "$FTP_USER","$FTP_PASS" "$FTP_SERVER" <<'LFTPEOF'
+          lftp -u "$FTP_USER","$FTP_PASS" "ftp://$FTP_SERVER" <<'LFTPEOF'
           set ftp:ssl-allow no
           set ftp:passive-mode yes
           set net:timeout 60
