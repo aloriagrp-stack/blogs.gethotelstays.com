@@ -17,37 +17,37 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Install dependencies
-        run: npm install || true
-
       - name: Generate static pages
-        run: node generate_static_pages.js || echo "Skipping"
+        run: node generate_static_pages.js || echo "Skipping static generation"
 
       - name: Generate sitemap
-        run: node generate_sitemap.js || echo "Skipping"
+        run: node generate_sitemap.js || echo "Skipping sitemap generation"
 
       - name: Install lftp
         run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
 
-      - name: Deploy to cPanel via FTP
+      - name: Create .ftpexclude
+        run: |
+          cat > .ftpexclude << 'EXCLUDE'
+          .git/
+          .github/
+          node_modules/
+          admin/
+          generate_sitemap.js
+          generate_static_pages.js
+          package.json
+          package-lock.json
+          README.md
+          .ftpexclude
+          EXCLUDE
+
+      - name: Deploy to cPanel
         env:
-          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_HOST: ${{ secrets.FTP_SERVER }}
           FTP_USER: ${{ secrets.FTP_USERNAME }}
           FTP_PASS: ${{ secrets.FTP_PASSWORD }}
         run: |
-          lftp -u "$FTP_USER","$FTP_PASS" "$FTP_SERVER" <<EOF
-          set ssl:verify-certificate no
-          set ftp:ssl-allow yes
-          mirror -R --verbose --delete \
-            --exclude .git/ \
-            --exclude .github/ \
-            --exclude node_modules/ \
-            --exclude generate_sitemap.js \
-            --exclude generate_static_pages.js \
-            --exclude package.json \
-            --exclude package-lock.json \
-            --exclude README.md \
-            --exclude admin/ \
-            . /public_html/blogs.gethotelstays.com/
-          bye
-          EOF
+          echo "Host: $FTP_HOST"
+          echo "User: $FTP_USER"
+          echo "Pass length: ${#FTP_PASS}"
+          lftp -u "$FTP_USER","$FTP_PASS" "$FTP_HOST" -e "set ssl:verify-certificate no; mirror -Rv --delete --exclude-glob .git --exclude-glob .github --exclude-glob node_modules --exclude-glob admin --exclude-glob generate_* --exclude-glob package* --exclude-glob README.md --exclude-glob .ftpexclude . /public_html/blogs.gethotelstays.com/; bye"
