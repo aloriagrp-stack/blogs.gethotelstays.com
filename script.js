@@ -73,25 +73,38 @@ document.addEventListener('DOMContentLoaded', () => {
     handleRouting();
 });
 
-// Handle simple hash routing
+// Handle Routing via HTML5 History API (Clean URLs without Hash #)
+window.addEventListener('popstate', handleRouting);
 window.addEventListener('hashchange', handleRouting);
 
 function handleRouting() {
+    // 1. Handle Clean Path Slugs (e.g. /why-hotel-prices-are-rising-ahead-of-independence-day-weekend-2026.html)
+    const rawPath = window.location.pathname.split('/').pop() || '';
+    const cleanPath = rawPath.replace(/\.html$/, '').trim();
+
+    if (cleanPath && cleanPath !== 'index' && cleanPath !== '') {
+        const article = articles.find(a => a.slug === cleanPath || `article-${a.id}` === cleanPath);
+        if (article) {
+            loadArticlePage(article.id);
+            return;
+        }
+    }
+
+    // 2. Legacy Hash Support: Automatically convert legacy #/slug-name to Clean URL
     const hash = window.location.hash;
-    
-    // Handle slug-based routing: #/slug-name
     if (hash && hash.startsWith('#/')) {
-        const slug = hash.replace('#/', '');
+        const slug = hash.replace('#/', '').trim();
         if (slug) {
-            const article = articles.find(a => a.slug === slug);
+            const article = articles.find(a => a.slug === slug || `article-${a.id}` === slug);
             if (article) {
+                history.replaceState({ articleId: article.id }, article.title, `${slug}.html`);
                 loadArticlePage(article.id);
                 return;
             }
         }
     }
-    
-    // Fallback/Home
+
+    // Fallback to Home View if no matching article slug
     if (activeArticle) {
         returnToBlogHome();
     }
@@ -181,10 +194,11 @@ function loadArticlePage(id) {
 
     activeArticle = article;
     
-    // Set URL hash routing with slug
+    // Set Clean URL (No Hash # Symbol!) for Enterprise SEO
     const slug = article.slug || `article-${article.id}`;
-    if (window.location.hash !== `#/${slug}`) {
-        window.location.hash = `#/${slug}`;
+    const cleanUrl = `${slug}.html`;
+    if (!window.location.pathname.endsWith(cleanUrl)) {
+        history.pushState({ articleId: id }, article.title, cleanUrl);
     }
     
     // Hide home view, show Article view
