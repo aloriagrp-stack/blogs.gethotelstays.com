@@ -40,24 +40,43 @@ jobs:
           # Clean host string (strip ftp:// or trailing slashes)
           CLEAN_HOST=$(echo "$FTP_SERVER" | sed -e 's|^ftp://||' -e 's|^ftps://||' -e 's|/$||')
 
-          echo "Connecting to FTP Host: $CLEAN_HOST as User: $FTP_USER..."
+          echo "Attempting connection to Primary Host: $CLEAN_HOST as User: $FTP_USER..."
 
-          lftp <<LFTPEOF
-          set ftp:ssl-allow no
-          set ftp:passive-mode yes
-          set net:timeout 60
-          set net:max-retries 5
-          set net:reconnect-interval-base 5
-          open -u "$FTP_USER","$FTP_PASS" "$CLEAN_HOST"
-          mirror --reverse --no-perms --verbose \
-            -x '^\.' \
-            -x '^node_modules/' \
-            -x '^admin/' \
-            -x '^generate_' \
-            -x '^package' \
-            -x 'README.md' \
-            -x '\.log$' \
-            . .
-          bye
+          # Function to run lftp mirror
+          run_lftp() {
+            HOST_TO_TRY="$1"
+            echo "--- Trying FTP Host: $HOST_TO_TRY ---"
+            lftp <<LFTPEOF
+            set ftp:ssl-allow no
+            set ftp:passive-mode yes
+            set net:timeout 30
+            set net:max-retries 2
+            debug 3
+            open -u "$FTP_USER","$FTP_PASS" "$HOST_TO_TRY"
+            mirror --reverse --no-perms --verbose \
+              -x '^\.' \
+              -x '^node_modules/' \
+              -x '^admin/' \
+              -x '^generate_' \
+              -x '^package' \
+              -x 'README.md' \
+              -x '\.log$' \
+              . .
+            bye
           LFTPEOF
-          echo "Blogs deployment completed successfully!"
+          }
+
+          # Try user provided host first
+          if run_lftp "$CLEAN_HOST"; then
+            echo "Deploy successful via $CLEAN_HOST!"
+            exit 0
+          fi
+
+          echo "Primary host $CLEAN_HOST failed. Trying direct cPanel server hostname: neo.herosite.pro..."
+          if run_lftp "neo.herosite.pro"; then
+            echo "Deploy successful via direct cPanel server host neo.herosite.pro!"
+            exit 0
+          fi
+
+          echo "ERROR: All FTP connection attempts failed."
+          exit 1
