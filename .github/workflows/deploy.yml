@@ -26,12 +26,11 @@ jobs:
       - name: Generate sitemap
         run: node generate_sitemap.js || echo "Skipping"
 
-      - name: Deploy via FTP
-        run: |
-          apt-get update -qq && apt-get install -y -qq lftp
-          lftp -c "
-            set ssl:verify-certificate no;
-            open ftp://${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}@${{ secrets.FTP_SERVER }};
-            mirror --reverse --verbose --delete --exclude .git/ --exclude .github/ --exclude node_modules/ --exclude generate_*.js --exclude package*.json --exclude README.md --exclude *.log . /public_html/blogs.gethotelstays.com/;
-            quit
-          "
+      - name: Deploy to cPanel
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.8
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: /public_html/blogs.gethotelstays.com/
+          exclude: .git*, .github*, node_modules*, *.log, README.md, generate_*.js, package*.json
