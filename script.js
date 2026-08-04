@@ -78,11 +78,16 @@ window.addEventListener('hashchange', handleRouting);
 
 function handleRouting() {
     const hash = window.location.hash;
-    if (hash && hash.startsWith('#article-')) {
-        const id = parseInt(hash.replace('#article-', ''));
-        if (id) {
-            loadArticlePage(id);
-            return;
+    
+    // Handle slug-based routing: #/slug-name
+    if (hash && hash.startsWith('#/')) {
+        const slug = hash.replace('#/', '');
+        if (slug) {
+            const article = articles.find(a => a.slug === slug);
+            if (article) {
+                loadArticlePage(article.id);
+                return;
+            }
         }
     }
     
@@ -176,9 +181,10 @@ function loadArticlePage(id) {
 
     activeArticle = article;
     
-    // Set URL hash routing
-    if (window.location.hash !== `#article-${id}`) {
-        window.location.hash = `#article-${id}`;
+    // Set URL hash routing with slug
+    const slug = article.slug || `article-${article.id}`;
+    if (window.location.hash !== `#/${slug}`) {
+        window.location.hash = `#/${slug}`;
     }
     
     // Hide home view, show Article view
@@ -214,6 +220,83 @@ function loadArticlePage(id) {
         scriptElement.className = 'dynamic-article-schema';
         scriptElement.textContent = schemaContent.trim();
         document.head.appendChild(scriptElement);
+    }
+
+    // ── Enterprise-Level SEO/AEO/GEO Schemas ──
+    const articleUrl = `${window.location.origin}/${slug}.html`;
+    const siteUrl = window.location.origin;
+    const imageUrl = article.image || `${siteUrl}/assets/resort.webp`;
+    const authorName = article.author || 'GetHotelStays Travel Team';
+
+    // Article Schema
+    const articleSchema = {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": article.title,
+        "description": article.excerpt,
+        "image": imageUrl,
+        "author": { "@type": "Organization", "name": authorName, "url": siteUrl },
+        "publisher": { "@type": "Organization", "name": "GetHotelStays", "url": siteUrl },
+        "datePublished": article.date || new Date().toISOString(),
+        "mainEntityOfPage": articleUrl,
+        "articleSection": article.categoryName,
+        "keywords": (article.tags || []).join(', ')
+    };
+    const articleScript = document.createElement('script');
+    articleScript.type = 'application/ld+json';
+    articleScript.className = 'dynamic-article-schema';
+    articleScript.textContent = JSON.stringify(articleSchema);
+    document.head.appendChild(articleScript);
+
+    // BreadcrumbList Schema
+    const breadcrumbSchema = {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": siteUrl },
+            { "@type": "ListItem", "position": 2, "name": article.categoryName, "item": `${siteUrl}/#${article.category}` },
+            { "@type": "ListItem", "position": 3, "name": article.title, "item": articleUrl }
+        ]
+    };
+    const breadcrumbScript = document.createElement('script');
+    breadcrumbScript.type = 'application/ld+json';
+    breadcrumbScript.className = 'dynamic-article-schema';
+    breadcrumbScript.textContent = JSON.stringify(breadcrumbSchema);
+    document.head.appendChild(breadcrumbScript);
+
+    // FAQ Schema (AEO)
+    if (article.faq && article.faq.length > 0) {
+        const faqSchema = {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": article.faq.map(faq => ({
+                "@type": "Question",
+                "name": faq.question,
+                "acceptedAnswer": { "@type": "Answer", "text": faq.answer }
+            }))
+        };
+        const faqScript = document.createElement('script');
+        faqScript.type = 'application/ld+json';
+        faqScript.className = 'dynamic-article-schema';
+        faqScript.textContent = JSON.stringify(faqSchema);
+        document.head.appendChild(faqScript);
+    }
+
+    // GEO Schema - Citations, Claims, Entities
+    if (article.geo) {
+        const geoSchema = {
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "@id": articleUrl,
+            "about": (article.geo.entities || []).map(e => ({ "@type": "Thing", "name": e })),
+            "citation": (article.geo.citations || []).map(c => ({ "@type": "Citation", "name": c.source, "url": c.url })),
+            "claimReviewed": (article.geo.claims || []).map(claim => ({ "@type": "Claim", "text": claim }))
+        };
+        const geoScript = document.createElement('script');
+        geoScript.type = 'application/ld+json';
+        geoScript.className = 'dynamic-article-schema';
+        geoScript.textContent = JSON.stringify(geoSchema);
+        document.head.appendChild(geoScript);
     }
 
     // Extract, compile and inject the style blocks natively into document head

@@ -100,7 +100,8 @@ initialArticles.forEach((article) => {
 
     // 2. Update Open Graph Meta tags in Head
     const ogUrlRegex = /<meta\s+property=["']og:url["']\s+content=["'][\s\S]*?["']\s*\/?>/i;
-    pageHtml = pageHtml.replace(ogUrlRegex, `<meta property="og:url" content="https://blogs.gethotelstays.com/article-${article.id}.html">`);
+    const slug = article.slug || `article-${article.id}`;
+    pageHtml = pageHtml.replace(ogUrlRegex, `<meta property="og:url" content="https://blogs.gethotelstays.com/${slug}.html">`);
 
     const ogTitleRegex = /<meta\s+property=["']og:title["']\s+content=["'][\s\S]*?["']\s*\/?>/i;
     pageHtml = pageHtml.replace(ogTitleRegex, `<meta property="og:title" content="${article.title.replace(/"/g, '&quot;')}">`);
@@ -112,7 +113,7 @@ initialArticles.forEach((article) => {
     pageHtml = pageHtml.replace(ogImageRegex, `<meta property="og:image" content="${article.image}">`);
 
     const canonicalRegex = /<link\s+rel=["']canonical["']\s+href=["'][\s\S]*?["']\s*\/?>/i;
-    pageHtml = pageHtml.replace(canonicalRegex, `<link rel="canonical" href="https://blogs.gethotelstays.com/article-${article.id}.html" />`);
+    pageHtml = pageHtml.replace(canonicalRegex, `<link rel="canonical" href="https://blogs.gethotelstays.com/${slug}.html" />`);
 
     // 3. Extract Styles
     const styleBlocks = [];
@@ -134,7 +135,7 @@ initialArticles.forEach((article) => {
         compiledCssBlock = `<style id="dynamic-article-styles">\n${imports.join('\n')}\n${compiledCss}\n</style>`;
     }
 
-    // 4. Extract Schemas
+    // 4. Extract existing schemas from article content
     const schemaBlocks = [];
     const schemaRegex = /<script\s+type=["']application\/ld\+json["'][\s\S]*?>([\s\S]*?)<\/script>/gi;
     let schemaMatch;
@@ -143,10 +144,162 @@ initialArticles.forEach((article) => {
         schemaBlocks.push(`<script type="application/ld+json" class="dynamic-article-schema">\n${schemaContent.trim()}\n</script>`);
     }
 
-    // Inject styles and schemas before </head>
+    // ── 4B. Generate Enterprise-Level Schemas ──
+    const articleUrl = `https://blogs.gethotelstays.com/${slug}.html`;
+    const siteUrl = 'https://blogs.gethotelstays.com';
+    const imageUrl = article.image || 'https://blogs.gethotelstays.com/assets/resort.webp';
+    const datePublished = article.date || new Date().toISOString().split('T')[0];
+    const authorName = article.author || 'GetHotelStays Travel Team';
+
+    // Article Schema (Article + BlogPosting)
+    const articleSchema = {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": article.title,
+        "description": article.excerpt,
+        "image": imageUrl,
+        "author": { "@type": "Organization", "name": authorName, "url": siteUrl },
+        "publisher": {
+            "@type": "Organization",
+            "name": "GetHotelStays",
+            "url": siteUrl,
+            "logo": { "@type": "ImageObject", "url": `${siteUrl}/assets/logo.png` }
+        },
+        "datePublished": datePublished,
+        "dateModified": datePublished,
+        "mainEntityOfPage": { "@type": "WebPage", "@id": articleUrl },
+        "articleSection": article.categoryName,
+        "keywords": (article.tags || []).join(', '),
+        "wordCount": (article.content || '').split(/\s+/).filter(w => w.length > 0).length,
+        "inLanguage": "en",
+        "about": { "@type": "Thing", "name": article.categoryName }
+    };
+    schemaBlocks.push(`<script type="application/ld+json" class="dynamic-article-schema">\n${JSON.stringify(articleSchema, null, 2)}\n</script>`);
+
+    // BreadcrumbList Schema
+    const breadcrumbSchema = {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": siteUrl },
+            { "@type": "ListItem", "position": 2, "name": article.categoryName, "item": `${siteUrl}/#${article.category}` },
+            { "@type": "ListItem", "position": 3, "name": article.title, "item": articleUrl }
+        ]
+    };
+    schemaBlocks.push(`<script type="application/ld+json" class="dynamic-article-schema">\n${JSON.stringify(breadcrumbSchema, null, 2)}\n</script>`);
+
+    // Organization Schema (runs once but included per page for AI crawlers)
+    const orgSchema = {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "GetHotelStays",
+        "url": "https://gethotelstays.com",
+        "logo": "https://gethotelstays.com/assets/logo.png",
+        "description": "India's premium hotel booking and travel guide platform",
+        "sameAs": [
+            "https://www.facebook.com/gethotelstays",
+            "https://www.instagram.com/gethotelstays",
+            "https://twitter.com/gethotelstays"
+        ],
+        "contactPoint": {
+            "@type": "ContactPoint",
+            "contactType": "customer service",
+            "availableLanguage": ["English", "Hindi"]
+        }
+    };
+    schemaBlocks.push(`<script type="application/ld+json" class="dynamic-article-schema">\n${JSON.stringify(orgSchema, null, 2)}\n</script>`);
+
+    // WebSite Schema with SearchAction
+    const websiteSchema = {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "GetHotelStays Blog",
+        "url": siteUrl,
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": `${siteUrl}/?search={search_term_string}`,
+            "query-input": "required name=search_term_string"
+        }
+    };
+    schemaBlocks.push(`<script type="application/ld+json" class="dynamic-article-schema">\n${JSON.stringify(websiteSchema, null, 2)}\n</script>`);
+
+    // FAQ Schema (AEO - Answer Engine Optimization)
+    if (article.faq && article.faq.length > 0) {
+        const faqSchema = {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": article.faq.map(faq => ({
+                "@type": "Question",
+                "name": faq.question,
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": faq.answer
+                }
+            }))
+        };
+        schemaBlocks.push(`<script type="application/ld+json" class="dynamic-article-schema">\n${JSON.stringify(faqSchema, null, 2)}\n</script>`);
+    }
+
+    // GEO Schema - Citations, Claims, Entities (Generative Engine Optimization)
+    if (article.geo) {
+        const geoSchema = {
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "@id": articleUrl,
+            "mainEntity": {
+                "@type": "Thing",
+                "name": article.title,
+                "description": article.excerpt,
+                "identifier": slug
+            },
+            "about": (article.geo.entities || []).map(entity => ({
+                "@type": "Thing",
+                "name": entity
+            })),
+            "citation": (article.geo.citations || []).map(cit => ({
+                "@type": "Citation",
+                "name": cit.source,
+                "url": cit.url,
+                "description": cit.claim
+            })),
+            "claimReviewed": (article.geo.claims || []).map(claim => ({
+                "@type": "Claim",
+                "text": claim,
+                "reviewedBy": {
+                    "@type": "Organization",
+                    "name": "GetHotelStays Editorial"
+                }
+            }))
+        };
+        schemaBlocks.push(`<script type="application/ld+json" class="dynamic-article-schema">\n${JSON.stringify(geoSchema, null, 2)}\n</script>`);
+    }
+
+    // Inject styles and all schemas before </head>
     const headCloseIndex = pageHtml.indexOf('</head>');
     if (headCloseIndex !== -1) {
-        const injectedHead = `${compiledCssBlock}\n${schemaBlocks.join('\n')}\n`;
+        // Add Twitter Card meta tags
+        const twitterMeta = `
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@gethotelstays">
+    <meta name="twitter:creator" content="@gethotelstays">
+    <meta name="twitter:title" content="${article.title.replace(/"/g, '&quot;')}">
+    <meta name="twitter:description" content="${article.excerpt.replace(/"/g, '&quot;')}">
+    <meta name="twitter:image" content="${imageUrl}">`;
+        
+        // Add additional SEO meta tags
+        const seoMeta = `
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+    <meta name="author" content="${authorName}">
+    <meta name="geo.region" content="IN-DL">
+    <meta name="geo.placename" content="Delhi">
+    <link rel="alternate" hreflang="en" href="${articleUrl}">
+    <link rel="alternate" hreflang="hi" href="${articleUrl}">
+    <meta property="article:published_time" content="${datePublished}">
+    <meta property="article:modified_time" content="${datePublished}">
+    <meta property="article:section" content="${article.categoryName}">
+    <meta property="article:tag" content="${(article.tags || []).join(', ')}">`;
+        
+        const injectedHead = `${seoMeta}\n${twitterMeta}\n${compiledCssBlock}\n${schemaBlocks.join('\n')}\n`;
         pageHtml = pageHtml.slice(0, headCloseIndex) + injectedHead + pageHtml.slice(headCloseIndex);
     }
 
@@ -237,7 +390,7 @@ initialArticles.forEach((article) => {
     pageHtml = pageHtml.replace('<article class="page-article-content" id="page-article-content">', `<article class="page-article-content" id="page-article-content">\n${articleMarkup}`);
 
     // 8. Write file to disk
-    const outputFilename = `article-${article.id}.html`;
+    const outputFilename = `${slug}.html`;
     const outputPath = path.join(__dirname, outputFilename);
     fs.writeFileSync(outputPath, pageHtml, 'utf8');
     console.log(`Generated ${outputFilename}`);

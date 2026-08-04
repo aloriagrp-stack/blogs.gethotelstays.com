@@ -351,6 +351,7 @@ function setupAdminEventListeners() {
                 // Merge changes
                 articles[articleIndex] = {
                     ...articles[articleIndex],
+                    slug: generateSlug(titleVal),
                     title: titleVal,
                     excerpt: excerptVal,
                     category: categoryVal,
@@ -375,6 +376,7 @@ function setupAdminEventListeners() {
 
             const newArticle = {
                 id: newId,
+                slug: generateSlug(titleVal),
                 title: titleVal,
                 excerpt: excerptVal,
                 category: categoryVal,
@@ -386,7 +388,7 @@ function setupAdminEventListeners() {
                 date: formattedDate,
                 readTime: readTimeVal,
                 tags: tagsVal,
-                featured: false, // Defaulting false, first element will naturally resolve on homepage
+                featured: false,
                 content: contentVal,
                 comments: []
             };
@@ -492,6 +494,16 @@ window.deletePost = function(id) {
         }
     }
 };
+
+// Generate URL-friendly slug from title
+function generateSlug(title) {
+    return title
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .trim();
+}
 
 // Simple HTML escaping helper
 function escapeHTML(str) {
