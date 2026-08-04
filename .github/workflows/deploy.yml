@@ -35,16 +35,19 @@ jobs:
           FTP_USER: ${{ secrets.FTP_USERNAME }}
           FTP_PASS: ${{ secrets.FTP_PASSWORD }}
         run: |
-          lftp -e "
-            set ssl:verify-certificate no;
-            set ftp:ssl-allow yes;
-            mirror -R --verbose --delete \
-              --exclude .git/ \
-              --exclude .github/ \
-              --exclude node_modules/ \
-              --exclude generate_*.js \
-              --exclude package*.json \
-              --exclude README.md \
-              --exclude *.log \
-              . /public_html/blogs.gethotelstays.com/;
-            quit" -u "$FTP_USER","FTP_PASS" "$FTP_SERVER"
+          lftp -u "$FTP_USER","$FTP_PASS" "$FTP_SERVER" <<EOF
+          set ssl:verify-certificate no
+          set ftp:ssl-allow yes
+          mirror -R --verbose --delete \
+            --exclude .git/ \
+            --exclude .github/ \
+            --exclude node_modules/ \
+            --exclude generate_sitemap.js \
+            --exclude generate_static_pages.js \
+            --exclude package.json \
+            --exclude package-lock.json \
+            --exclude README.md \
+            --exclude admin/ \
+            . /public_html/blogs.gethotelstays.com/
+          bye
+          EOF
