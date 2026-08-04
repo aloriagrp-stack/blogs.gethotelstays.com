@@ -21,42 +21,17 @@ jobs:
         run: npm install || true
 
       - name: Generate static pages
-        run: node generate_static_pages.js || echo "Skipping static page generation"
+        run: node generate_static_pages.js || echo "Skipping"
 
       - name: Generate sitemap
-        run: node generate_sitemap.js || echo "Skipping sitemap generation"
+        run: node generate_sitemap.js || echo "Skipping"
 
-      - name: Debug - Check secrets
+      - name: Deploy via FTP
         run: |
-          echo "=== Checking Secrets ==="
-          if [ -z "${{ secrets.FTP_SERVER }}" ]; then
-            echo "❌ FTP_SERVER is MISSING"
-          else
-            echo "✅ FTP_SERVER is set"
-          fi
-          if [ -z "${{ secrets.FTP_USERNAME }}" ]; then
-            echo "❌ FTP_USERNAME is MISSING"
-          else
-            echo "✅ FTP_USERNAME is set"
-          fi
-          if [ -z "${{ secrets.FTP_PASSWORD }}" ]; then
-            echo "❌ FTP_PASSWORD is MISSING"
-          else
-            echo "✅ FTP_PASSWORD is set"
-          fi
-
-      - name: Deploy to cPanel via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: /public_html/blogs.gethotelstays.com/
-          exclude: |
-            .git*
-            .github*
-            node_modules*
-            *.log
-            README.md
-            generate_*.js
-            package*.json
+          apt-get update -qq && apt-get install -y -qq lftp
+          lftp -c "
+            set ssl:verify-certificate no;
+            open ftp://${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}@${{ secrets.FTP_SERVER }};
+            mirror --reverse --verbose --delete --exclude .git/ --exclude .github/ --exclude node_modules/ --exclude generate_*.js --exclude package*.json --exclude README.md --exclude *.log . /public_html/blogs.gethotelstays.com/;
+            quit
+          "
