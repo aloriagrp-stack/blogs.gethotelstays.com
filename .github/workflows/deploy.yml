@@ -37,19 +37,19 @@ jobs:
             exit 1
           fi
 
-          # Clean host string (remove ftp:// prefix if present)
+          # Clean host string (strip ftp:// or trailing slashes)
           CLEAN_HOST=$(echo "$FTP_SERVER" | sed -e 's|^ftp://||' -e 's|^ftps://||' -e 's|/$||')
 
           echo "Connecting to FTP Host: $CLEAN_HOST as User: $FTP_USER..."
 
-          lftp -u "$FTP_USER","$FTP_PASS" "ftp://$CLEAN_HOST" <<'LFTPEOF'
+          lftp -u "$FTP_USER","$FTP_PASS" "$CLEAN_HOST" <<'LFTPEOF'
           set ftp:ssl-allow no
           set ftp:passive-mode yes
           set net:timeout 60
           set net:max-retries 5
           set net:reconnect-interval-base 5
           
-          # Mirror directly to FTP root folder (for dedicated domain FTP accounts)
+          # Mirror directly to current root folder
           mirror --reverse --no-perms --verbose \
             -x '^\.' \
             -x '^node_modules/' \
