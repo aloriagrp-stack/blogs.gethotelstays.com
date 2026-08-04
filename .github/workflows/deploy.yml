@@ -42,14 +42,13 @@ jobs:
 
           echo "Connecting to FTP Host: $CLEAN_HOST as User: $FTP_USER..."
 
-          lftp -u "$FTP_USER","$FTP_PASS" "$CLEAN_HOST" <<'LFTPEOF'
+          lftp <<LFTPEOF
           set ftp:ssl-allow no
           set ftp:passive-mode yes
           set net:timeout 60
           set net:max-retries 5
           set net:reconnect-interval-base 5
-          
-          # Mirror directly to current root folder
+          open -u "$FTP_USER","$FTP_PASS" "$CLEAN_HOST"
           mirror --reverse --no-perms --verbose \
             -x '^\.' \
             -x '^node_modules/' \
