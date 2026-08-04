@@ -26,6 +26,25 @@ jobs:
       - name: Generate sitemap
         run: node generate_sitemap.js || echo "Skipping sitemap generation"
 
+      - name: Debug - Check secrets
+        run: |
+          echo "=== Checking Secrets ==="
+          if [ -z "${{ secrets.FTP_SERVER }}" ]; then
+            echo "❌ FTP_SERVER is MISSING"
+          else
+            echo "✅ FTP_SERVER is set"
+          fi
+          if [ -z "${{ secrets.FTP_USERNAME }}" ]; then
+            echo "❌ FTP_USERNAME is MISSING"
+          else
+            echo "✅ FTP_USERNAME is set"
+          fi
+          if [ -z "${{ secrets.FTP_PASSWORD }}" ]; then
+            echo "❌ FTP_PASSWORD is MISSING"
+          else
+            echo "✅ FTP_PASSWORD is set"
+          fi
+
       - name: Deploy to cPanel via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
